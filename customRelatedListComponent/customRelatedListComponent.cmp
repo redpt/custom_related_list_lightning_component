@@ -1,0 +1,217 @@
+<aura:component extends="c:LightningUtilities" implements="forceCommunity:availableForAllPageTypes,force:hasRecordId">
+    <!--Aura Attributes-->
+    <aura:attribute name="relatedObjectAPIName" type="String" description="SELECT x FROM *parentObject*"/>
+    <aura:attribute name="relatedListName" type="String" description="Name of the related list object(plural)"/>
+    <aura:attribute name="fieldNames" type="String" default="Name" description="CSV Text that you want displayed on the column headers"/>
+    <aura:attribute name="fieldNameList" type="String[]"/>
+    <aura:attribute name="fieldAPINames" type="String" default="Name" description="CSV API Names of the field data that you want to correspond to the headers (must be equal count to FieldNames)"/>
+    <aura:attribute name="fieldDataList" type="Object"/>
+    <aura:attribute name="disableLinks" type="Boolean" default="false"/>
+    <aura:attribute name="iconLabel" type="String" description="Icon displayed on the related list component. Recommended to use the ones relevent to the type of the related list object (https://www.lightningdesignsystem.com/icons/)"/>
+    <aura:attribute name="FieldRelatedToRecordId" type="String" description="Field on the related record that maps to the parent object"/>
+    <aura:attribute name="relatedRecordLimit" type="Integer" default="100"/>
+    <aura:attribute name="disableViewAllFeature" type="Boolean" default="false"/>
+    <aura:attribute name="disableNewRecordFeature" type="Boolean" default="false"/>
+    <aura:attribute name="relatedListRecordViewMaximumCount" type="Integer" default="6"/>
+    
+	<!--Lightning event handlers-->
+    <aura:handler name="init" value="{!this}" action="{!c.getEntitlementRecords}"/>
+    <aura:handler name="change" value="{!v.recordsQueried}" action="{!c.setDataTables}"/>
+
+    <!--Component Body-->
+    <article class="slds-card slds-scrollable">
+        <div class="slds-card__header slds-p-around_none slds-m-bottom_none">
+            <header>
+                <div class="slds-page-header">
+                    <div class="slds-page-header__row">
+                        <div class="slds-page-header__col-title">
+                            <div class="slds-media">
+                                <div class="slds-media__figure">
+                                    <span class="slds-icon_container slds-icon-standard-opportunity">
+                                        <aura:if isTrue="{!not(equals(v.iconLabel,null))}">
+                                            <lightning:icon iconName="{!v.iconLabel}" alternativeText="Record Icon" size="small"/>
+                                            <aura:set attribute="else">
+                                                <lightning:icon iconName="utility:automate" alternativeText="Record Icon" size="small"/>
+                                            </aura:set>
+                                        </aura:if>
+                                    </span>
+                                </div>
+                                <div class="slds-media__body">
+                                    <div class="slds-page-header__name">
+                                        <div class="slds-page-header__name-title">
+                                            <h1>
+                                                <aura:if isTrue="{!lessthanorequal(v.recordsQueried.length,6)}">
+                                                    <span class="slds-page-header__title slds-truncate"><a onclick="{!c.showAll}">Entitlements ({!v.recordsQueried.length})</a></span>
+                                                    <aura:set attribute="else">
+                                                        <span class="slds-page-header__title slds-truncate"><a onclick="{!c.showAll}">Entitlements (6+){!v.recordsQueried.length}</a></span>
+                                                    </aura:set>
+                                                </aura:if>
+                                            </h1>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <aura:if isTrue="{!not(v.disableNewRecordFeature)}">
+                        <!--
+						"new Record" button currently unavailable
+                        <div class="slds-page-header__col-actions">
+                            <div class="slds-page-header__controls">
+                                <div class="slds-page-header__control">
+                                    <ul class="slds-button-group-list">
+                                        <li>
+                                            <button class="slds-button slds-button_neutral">New</button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+						-->
+                        </aura:if>
+                    </div>
+                </div>
+            </header>
+        </div>
+        <aura:if isTrue="{!not(equals(v.recordsQueried.length,0))}">
+            <div class="slds-card__body slds-m-vertical_none">
+                <table aria-multiselectable="true" class="slds-table slds-table_bordered slds-table_edit slds-table_fixed-layout slds-table_resizable-cols slds-tree slds-table_tree" role="treegrid">
+                    <thead>
+                        <tr class="slds-line-height_reset">
+                            <aura:if isTrue="{!v.fieldNameList.length>0}">
+                                <th aria-label="field-0" aria-sort="none" class="slds-has-button-menu" scope="col">
+                                    <div class="slds-p-horizontal_large slds-p-vertical_small">
+                                        <div class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate">
+                                            <span class="slds-truncate" title="{!v.fieldNameList[0]}">{!v.fieldNameList[0]}</span>
+                                        </div>
+                                    </div>
+                                </th>
+                            </aura:if>
+                            <aura:if isTrue="{!v.fieldNameList.length>1}">
+                                <th aria-label="field-1" aria-sort="none" class="slds-has-button-menu" scope="col">
+                                    <div class="slds-p-vertical_small">
+                                        <div class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate">
+                                            <span class="slds-truncate" title="{!v.fieldNameList[1]}">{!v.fieldNameList[1]}</span>
+                                        </div>
+                                    </div>
+                                </th>
+                            </aura:if>
+                            <aura:if isTrue="{!v.fieldNameList.length>2}">
+                                <th aria-label="field-2" aria-sort="none" class="slds-has-button-menu" scope="col">
+                                    <div class="slds-p-vertical_small">
+                                        <div class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate">
+                                            <span class="slds-truncate" title="{!v.fieldNameList[2]}">{!v.fieldNameList[2]}</span>
+                                        </div>
+                                    </div>
+                                </th>
+                            </aura:if>
+                            <aura:if isTrue="{!v.fieldNameList.length>3}">
+                                <th aria-label="field-3" aria-sort="none" class="slds-has-button-menu" scope="col">
+                                    <div class="slds-p-vertical_small">
+                                        <div class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate">
+                                            <span class="slds-truncate" title="{!v.fieldNameList[3]}">{!v.fieldNameList[3]}</span>
+                                        </div>
+                                    </div>
+                                </th>
+                            </aura:if>
+                            <aura:if isTrue="{!v.fieldNameList.length>4}">
+                                <th aria-label="field-4" aria-sort="none" class="slds-has-button-menu" scope="col">
+                                    <div class="slds-p-vertical_small">
+                                        <div class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate">
+                                            <span class="slds-truncate" title="{!v.fieldNameList[4]}">{!v.fieldNameList[4]}</span>
+                                        </div>
+                                    </div>
+                                </th>
+                            </aura:if>
+                            <aura:if isTrue="{!v.fieldNameList.length>5}">
+                                <th aria-label="field-5" aria-sort="none" class="slds-has-button-menu" scope="col">
+                                    <div class="slds-p-vertical_small">
+                                        <div class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate">
+                                            <span class="slds-truncate" title="{!v.fieldNameList[5]}">{!v.fieldNameList[5]}</span>
+                                        </div>
+                                    </div>
+                                </th>
+                            </aura:if>
+                            <aura:if isTrue="{!v.fieldNameList.length>6}">
+                                <th aria-label="field-6" aria-sort="none" class="slds-has-button-menu" scope="col">
+                                    <div class="slds-p-vertical_small">
+                                        <div class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate">
+                                            <span class="slds-truncate" title="{!v.fieldNameList[6]}">{!v.fieldNameList[6]}</span>
+                                        </div>
+                                    </div>
+                                </th>
+                            </aura:if>
+                            <aura:if isTrue="{!v.fieldNameList.length>7}">
+                                <th aria-label="field-7" aria-sort="none" class="slds-has-button-menu" scope="col">
+                                    <div class="slds-p-vertical_small">
+                                        <div class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate">
+                                            <span class="slds-truncate" title="{!v.fieldNameList[7]}">{!v.fieldNameList[7]}</span>
+                                        </div>
+                                    </div>
+                                </th>
+                            </aura:if>
+                            <aura:if isTrue="{!v.fieldNameList.length>8}">
+                                <th aria-label="field-8" aria-sort="none" class="slds-has-button-menu" scope="col">
+                                    <div class="slds-p-vertical_small">
+                                        <div class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate">
+                                            <span class="slds-truncate" title="{!v.fieldNameList[8]}">{!v.fieldNameList[8]}</span>
+                                        </div>
+                                    </div>
+                                </th>
+                            </aura:if>
+                            <aura:if isTrue="{!v.fieldNameList.length>9}">
+                                <th aria-label="field-9" aria-sort="none" class="slds-has-button-menu" scope="col">
+                                    <div class="slds-p-vertical_small">
+                                        <div class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate">
+                                            <span class="slds-truncate" title="{!v.fieldNameList[9]}">{!v.fieldNameList[9]}</span>
+                                        </div>
+                                    </div>
+                                </th>
+                            </aura:if>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <aura:if isTrue="{!not(equals(v.fieldDataList,null))}">
+                            <aura:iteration items="{!v.fieldDataList}" var="entitlementAsset">
+                                <tr aria-selected="false" aria-setsize="4" class="slds-hint-parent" tabindex="0">
+                                    <!--
+                            <td class="slds-p-left_none" data-label="Start Date" role="gridcell">
+                                <div class="slds-truncate" title="{!entitlementAsset.Entitlement__r.StartDate}">
+                                    <aura:if isTrue="">
+                                    </aura:if>
+                                    <lightning:formattedDateTime value="{!entitlementAsset.Entitlement__r.StartDate}"/>
+                                </div>
+                            </td>
+                            <td class="slds-p-left_none" data-label="End Date" role="gridcell">
+                                <div class="slds-truncate" title="{!entitlementAsset.Entitlement__r.EndDate}">
+                                    <lightning:formattedDateTime value="{!entitlementAsset.Entitlement__r.EndDate}"/>
+                                </div>
+                            </td>
+             				-->
+                                    <aura:iteration items="{!entitlementAsset}" var="fieldValue" indexVar="i">
+                                        <aura:if isTrue="{!equals(i, 0)}">
+                                            <th class="slds-tree__item slds-p-left_none" data-label="{!'field-'+v.i}" scope="row">
+                                                <div class="slds-truncate slds-p-left_large" title="{!fieldValue}">{!fieldValue}</div>
+                                            </th>
+                                            <aura:set attribute="else">
+                                                <td class="slds-p-left_none" data-label="{!'field-'+v.i}" role="gridcell">
+                                                    <div class="slds-truncate" title="{!fieldValue}">
+                                                        {!fieldValue}
+                                                    </div>
+                                                </td>
+                                            </aura:set>
+                                        </aura:if>
+                                    </aura:iteration>
+                                </tr>
+                            </aura:iteration>
+                        </aura:if>
+                    </tbody>
+                </table>
+            </div>
+        </aura:if>
+        <aura:if isTrue="{!not(v.disableViewAllFeature)}">
+            <div class="slds-card__footer slds-m-top_none">
+                <a onclick="{!c.showAll}">View All</a>
+            </div>
+        </aura:if>
+    </article>
+</aura:component>

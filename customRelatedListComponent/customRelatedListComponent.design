@@ -1,0 +1,13 @@
+<design:component>
+	<design:attribute name="relatedObjectAPIName" label="Related List Objects' API Name" required="true" description="API Name for the related records."/>
+    <design:attribute name="relatedListName" label="Name of the Related List" required="true" description="Name of the related list object(plural)"/>
+    <design:attribute name="fieldNames" label="List of Field Names" required="{!true}" description="CSV list the text (in order) that you want assigned to the columns."/>
+	<design:attribute name="fieldAPINames" label="List of Corresponding API Names" required="true" description="CSV list the field API names (in order) that you want assigned to the columns."/>
+    <design:attribute name="disableLinks" label="Hide Links" required="{!false}" description="Set to false to disable the ability to click on links."/>
+    <design:attribute name="iconLabel" label="Icon Label" required="{!true}" description="Icon used to represent your related list (https://www.lightningdesignsystem.com/icons/)."/>
+    <design:attribute name="FieldRelatedToRecordId" label="Related Record Child Field API Name" required="{!true}" description="Field on the related record that maps to the parent object Id (recordId)"/>
+    <design:attribute name="relatedRecordLimit" label="Record Query Limit" required="{!false}" description="Maximum number of records to query (defaulted to 100)."/>
+    <design:attribute name="disableViewAllFeature" label="Disable 'View All' Functionality" required="{!false}" description="Set true to disable the ability to access 'View All' related list functionality."/>
+    <design:attribute name="disableNewRecordFeature" label="Disable 'New Record' Functionality" required="{!false}" description="Set true to disable the ability to create new related records."/>
+    <design:attribute name="relatedListRecordViewMaximumCount" label="Maximum View" required="{!false}" description="Maximum number of related list items to display on component. Set -1 to maximum. Defaults to 6."/>
+</design:component>
