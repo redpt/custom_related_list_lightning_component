@@ -3,6 +3,8 @@ This is currently incomplete and has a few issues with it:
 1) Fields do not display by type (dates do not appear as formatted dates, for example)
 2) Field values coming from related records do not populate
 
+Note: This does require the LightningUtilities extensible Lightning component
+
 Example communities implementation:
 1) Drag to desired location
 2) Fill the required fields:
